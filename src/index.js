@@ -1,66 +1,58 @@
-// HTTP API wrapper for FallDNS SDK. Express, JSON in / JSON out.
+// falldns-api · Express HTTP wrapper around falldns-sdk · MIT · AI-Native Solutions
 import express from 'express';
-import { FallDNS } from '@ai-native-solutions/falldns-sdk';
-import { loadOrCreateIdentity, inProcessLink, fileStorage } from './identity.js';
 
-export async function createApp() {
-  const fid = await loadOrCreateIdentity();
-  const flk = inProcessLink();
-  const storage = fileStorage(process.env.FALLDNS_RECORDS_PATH || undefined);
-  const dns = new FallDNS({ fallidInstance: fid, falllinkInstance: flk, storage });
+const app = express();
+app.use(express.json({ limit: '10mb' }));
 
-  const app = express();
-  app.use(express.json({ limit: '256kb' }));
+app.get('/health', (_req, res) => res.json({ ok: true, tool: 'falldns', version: '1.0.0' }));
 
-  app.get('/health', (_req, res) => res.json({ ok: true, did: fid.did }));
+app.post('/ensureFallID', async (req, res) => {
+  try {
+    const { ensureFallID } = await import('@ai-native-solutions/falldns-sdk');
+    const out = typeof ensureFallID === 'function' ? await ensureFallID(req.body) : { error: 'ensureFallID not callable' };
+    res.json(out);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
 
-  app.get('/identity', (_req, res) => res.json({ did: fid.did }));
+app.post('/ensureFallLink', async (req, res) => {
+  try {
+    const { ensureFallLink } = await import('@ai-native-solutions/falldns-sdk');
+    const out = typeof ensureFallLink === 'function' ? await ensureFallLink(req.body) : { error: 'ensureFallLink not callable' };
+    res.json(out);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
 
-  app.post('/claim', async (req, res) => {
-    try {
-      const rec = await dns.claim(req.body?.name);
-      res.status(201).json(rec);
-    } catch (e) { res.status(400).json({ error: e.message }); }
-  });
+app.post('/statusMsg', async (req, res) => {
+  try {
+    const { statusMsg } = await import('@ai-native-solutions/falldns-sdk');
+    const out = typeof statusMsg === 'function' ? await statusMsg(req.body) : { error: 'statusMsg not callable' };
+    res.json(out);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
 
-  app.post('/release', async (req, res) => {
-    try {
-      const rec = await dns.releaseName(req.body?.name);
-      res.status(200).json(rec);
-    } catch (e) { res.status(400).json({ error: e.message }); }
-  });
+app.post('/renderMine', async (req, res) => {
+  try {
+    const { renderMine } = await import('@ai-native-solutions/falldns-sdk');
+    const out = typeof renderMine === 'function' ? await renderMine(req.body) : { error: 'renderMine not callable' };
+    res.json(out);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
 
-  app.get('/resolve/:name', async (req, res) => {
-    try {
-      const out = await dns.resolve(req.params.name);
-      if (!out) return res.status(404).json({ error: 'no claim found', name: req.params.name });
-      res.json(out);
-    } catch (e) { res.status(400).json({ error: e.message }); }
-  });
+app.post('/renderDir', async (req, res) => {
+  try {
+    const { renderDir } = await import('@ai-native-solutions/falldns-sdk');
+    const out = typeof renderDir === 'function' ? await renderDir(req.body) : { error: 'renderDir not callable' };
+    res.json(out);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
 
-  app.get('/mine', async (_req, res) => {
-    try { res.json(await dns.listMyClaims()); }
-    catch (e) { res.status(500).json({ error: e.message }); }
-  });
+app.post('/renderConflicts', async (req, res) => {
+  try {
+    const { renderConflicts } = await import('@ai-native-solutions/falldns-sdk');
+    const out = typeof renderConflicts === 'function' ? await renderConflicts(req.body) : { error: 'renderConflicts not callable' };
+    res.json(out);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
 
-  app.get('/directory', async (_req, res) => {
-    try { res.json(await dns.listAllKnown()); }
-    catch (e) { res.status(500).json({ error: e.message }); }
-  });
-
-  app.get('/conflicts', async (_req, res) => {
-    try { res.json(await dns.listConflicts()); }
-    catch (e) { res.status(500).json({ error: e.message }); }
-  });
-
-  app.get('/records', (_req, res) => res.json(dns.exportRecords()));
-
-  app.post('/ingest', async (req, res) => {
-    try {
-      const changed = await dns.importRecord(req.body);
-      res.status(changed ? 201 : 200).json({ changed });
-    } catch (e) { res.status(400).json({ error: e.message }); }
-  });
-
-  return app;
-}
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log('falldns-api listening on :' + PORT));

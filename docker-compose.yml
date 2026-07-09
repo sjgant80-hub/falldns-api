@@ -1,18 +1,8 @@
 services:
   falldns-api:
     build: .
-    image: ai-native-solutions/falldns-api:1.0.0
-    container_name: falldns-api
     ports:
-      - "3535:3535"
+      - "3000:3000"
     environment:
-      - PORT=3535
-      - HOST=0.0.0.0
-      - FALLDNS_KEY_PATH=/data/identity.json
-      - FALLDNS_RECORDS_PATH=/data/records.json
-    volumes:
-      - falldns-data:/data
+      PORT: "3000"
     restart: unless-stopped
-
-volumes:
-  falldns-data:

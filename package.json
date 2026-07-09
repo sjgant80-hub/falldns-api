@@ -1,28 +1,25 @@
 {
   "name": "@ai-native-solutions/falldns-api",
   "version": "1.0.0",
-  "description": "HTTP API for FallDNS — sovereign human-name resolver.",
+  "description": "falldns HTTP API · Express wrapper around @ai-native-solutions/falldns-sdk",
   "type": "module",
   "main": "src/index.js",
-  "bin": {
-    "falldns-api": "src/bin.js"
-  },
-  "files": ["src", "Dockerfile", "docker-compose.yml", "README.md", "LICENSE"],
+  "files": ["src", "README.md", "LICENSE", "Dockerfile", "docker-compose.yml"],
   "scripts": {
-    "start": "node src/bin.js"
+    "start": "node src/index.js"
   },
-  "keywords": ["falldns", "http", "api", "express", "did", "sovereign", "naming"],
+  "keywords": ["falldns", "api", "http", "express", "ai-native-solutions"],
   "author": "AI-Native Solutions",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/sjgant80-hub/falldns-api.git"
   },
-  "homepage": "https://sjgant80-hub.github.io/falldns-api/",
   "dependencies": {
-    "express": "^4.19.2",
+    "express": "^4.19.0",
     "@ai-native-solutions/falldns-sdk": "^1.0.0"
   },
-  "engines": { "node": ">=18" },
-  "publishConfig": { "access": "public" }
+  "publishConfig": {
+    "access": "public"
+  }
 }
